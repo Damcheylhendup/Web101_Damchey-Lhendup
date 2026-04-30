@@ -1,8 +1,13 @@
 import api from "@/lib/api-config";
 
 export const getAllVideos = async () => {
-  const res = await api.get("/videos");
-  return res.data;
+  const res = await fetch("http://localhost:5000/api/videos");
+
+  if (!res.ok) {
+    throw new Error("Failed to fetch videos");
+  }
+  
+  return res.json();
 };
 
 export const getFollowingVideos = async () => {

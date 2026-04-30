@@ -1,24 +1,68 @@
 export default function FollowingPage() {
-  return (
-    <div className="max-w-[550px] mx-auto py-10 text-center">
-      <h2 className="text-2xl font-bold mb-3">Follow accounts</h2>
-      <p className="text-gray-500 mb-8">Follow accounts to see their latest videos</p>
+  const users = [
+    { id: 1, username: "user_1", name: "User 1" },
+    { id: 2, username: "user_2", name: "User 2" },
+    { id: 3, username: "user_3", name: "User 3" },
+    { id: 4, username: "user_4", name: "User 4" },
+    { id: 5, username: "user_5", name: "User 5" },
+    { id: 6, username: "user_6", name: "User 6" },
+    { id: 7, username: "user_7", name: "User 7" },
+    { id: 8, username: "user_8", name: "User 8" },
+  ];
 
-      <div className="grid grid-cols-5 gap-4 mb-6">
-        {Array.from({ length: 5 }).map((_, index) => (
-          <div key={index} className="text-center">
-            <div className="h-16 w-16 rounded-full bg-gray-300 mx-auto mb-2"></div>
-            <p className="text-sm font-semibold">user_{index + 1}</p>
-            <button className="mt-2 text-xs bg-red-500 text-white py-1 px-4 rounded-full">
+  return (
+    <main style={{ padding: "30px" }}>
+      <h1>Follow accounts</h1>
+      <p style={{ color: "#64748b" }}>
+        Follow accounts to see their latest videos
+      </p>
+
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "repeat(4, 1fr)",
+          gap: "25px",
+          marginTop: "30px",
+        }}
+      >
+        {users.map((user) => (
+          <div
+            key={user.id}
+            style={{
+              textAlign: "center",
+              padding: "20px",
+              border: "1px solid #e5e7eb",
+              borderRadius: "12px",
+            }}
+          >
+            <div
+              style={{
+                width: "80px",
+                height: "80px",
+                borderRadius: "50%",
+                background: "#d1d5db",
+                margin: "0 auto 12px",
+              }}
+            ></div>
+
+            <h3>{user.username}</h3>
+            <p style={{ color: "#64748b" }}>{user.name}</p>
+
+            <button
+              style={{
+                background: "#ff2f3d",
+                color: "white",
+                border: "none",
+                padding: "8px 22px",
+                borderRadius: "20px",
+                cursor: "pointer",
+              }}
+            >
               Follow
             </button>
           </div>
         ))}
       </div>
-
-      <button className="border border-gray-300 text-gray-700 py-2 px-8 rounded-md font-medium">
-        See more
-      </button>
-    </div>
+    </main>
   );
 }

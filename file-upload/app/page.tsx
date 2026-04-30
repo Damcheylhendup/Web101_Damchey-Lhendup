@@ -1,166 +1,107 @@
 "use client";
 
-import { useState, useCallback } from "react";
-import { useDropzone } from "react-dropzone";
-import axios from "axios";
+import { useState } from "react";
 
 export default function Home() {
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [file, setFile] = useState<File | null>(null);
   const [message, setMessage] = useState("");
-  const [uploadProgress, setUploadProgress] = useState(0);
-
-  const validateFile = (file: File) => {
-    const allowedTypes = ["image/jpeg", "image/png", "application/pdf"];
-    const maxSize = 2 * 1024 * 1024;
-
-    if (!allowedTypes.includes(file.type)) {
-      return "Only JPG, PNG, and PDF files are allowed.";
-    }
-
-    if (file.size > maxSize) {
-      return "File size must be less than 2MB.";
-    }
-
-    return null;
-  };
-
-  const onDrop = useCallback((acceptedFiles: File[]) => {
-    const file = acceptedFiles[0];
-    if (!file) return;
-
-    const error = validateFile(file);
-    if (error) {
-      setMessage(error);
-      setSelectedFile(null);
-      return;
-    }
-
-    setSelectedFile(file);
-    setMessage(`File selected: ${file.name}`);
-  }, []);
-
-  const { getRootProps, getInputProps } = useDropzone({
-    onDrop,
-    multiple: false,
-  });
-
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    const error = validateFile(file);
-    if (error) {
-      setMessage(error);
-      setSelectedFile(null);
-      return;
-    }
-
-    setSelectedFile(file);
-    setMessage(`File selected: ${file.name}`);
-  };
 
   const handleUpload = async () => {
-    if (!selectedFile) {
-      setMessage("Please select a file first.");
+    if (!file) {
+      setMessage("Please choose a file first.");
       return;
     }
 
     const formData = new FormData();
-    formData.append("file", selectedFile);
+    formData.append("file", file);
 
     try {
-      setUploadProgress(0);
-
-      const response = await axios.post("http://localhost:8000/api/upload", formData, {
-        onUploadProgress: (progressEvent) => {
-          const total = progressEvent.total || 1;
-          const percent = Math.round((progressEvent.loaded * 100) / total);
-          setUploadProgress(percent);
-        },
+      const res = await fetch("http://localhost:8000/upload", {
+        method: "POST",
+        body: formData,
       });
 
-      setMessage(response.data.message);
-    } catch (error: any) {
-      setMessage(error.response?.data?.message || "Upload failed.");
+      if (!res.ok) {
+        throw new Error("Upload failed");
+      }
+
+      setMessage("Upload successful.");
+    } catch (error) {
+      console.log(error);
+      setMessage("Upload failed. Check backend server.");
     }
   };
 
   return (
-    <div style={styles.container}>
-      <div style={styles.card}>
-        <h1 style={styles.heading}>File Upload App</h1>
+    <main
+      style={{
+        minHeight: "100vh",
+        backgroundColor: "#eeeeee",
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+        color: "black",
+      }}
+    >
+      <div
+        style={{
+          width: "420px",
+          backgroundColor: "white",
+          padding: "30px",
+          borderRadius: "12px",
+          textAlign: "center",
+          boxShadow: "0 0 20px rgba(0,0,0,0.1)",
+          color: "black",
+          opacity:1
+        }}
+      >
+        <h2 style={{ color: "black" }}>File Upload App</h2>
 
-        <div {...getRootProps()} style={styles.dropzone}>
-          <input {...getInputProps()} />
-          <p>Drag and drop a file here, or click to select</p>
-        </div>
+        <label
+          style={{
+            display: "block",
+            border: "2px dashed #555",
+            padding: "35px",
+            margin: "25px 0",
+            cursor: "pointer",
+            color: "black",
+          }}
+        >
+          {file ? file.name : "Drag and drop a file here, or click to select"}
 
-        <input type="file" onChange={handleFileChange} style={styles.input} />
+          <input
+            type="file"
+            style={{ display: "none" }}
+            onChange={(e) => setFile(e.target.files?.[0] || null)}
+          />
+        </label>
 
-        <button onClick={handleUpload} style={styles.button}>
+        <button
+          onClick={handleUpload}
+          style={{
+            padding: "12px 20px",
+            backgroundColor: "#0070f3",
+            color: "white",
+            border: "none",
+            borderRadius: "6px",
+            cursor: "pointer",
+          }}
+        >
           Upload File
         </button>
 
-        {uploadProgress > 0 && (
-          <div style={{ marginTop: "20px", width: "100%" }}>
-            <p style={{ color: "#333" }}>Upload Progress: {uploadProgress}%</p>
-            <progress value={uploadProgress} max="100" style={{ width: "100%" }} />
-          </div>
+        {message && (
+          <p
+            style={{
+              marginTop: "20px",
+              fontWeight: "bold",
+              color: message.includes("successful") ? "green" : "red",
+            }}
+          >
+            {message}
+          </p>
         )}
-
-        {message && <p style={styles.message}>{message}</p>}
       </div>
-    </div>
+    </main>
   );
 }
-
-const styles: { [key: string]: React.CSSProperties } = {
-  container: {
-    display: "flex",
-    justifyContent: "center",
-    alignItems: "center",
-    minHeight: "100vh",
-    background: "#f4f4f4",
-    fontFamily: "Arial, sans-serif",
-  },
-  card: {
-    background: "#ffffff",
-    padding: "30px",
-    borderRadius: "12px",
-    boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
-    width: "420px",
-    textAlign: "center",
-    color: "#000",
-  },
-  heading: {
-    marginBottom: "20px",
-    color: "#111",
-  },
-  dropzone: {
-    border: "2px dashed #555",
-    padding: "30px",
-    marginBottom: "20px",
-    cursor: "pointer",
-    borderRadius: "10px",
-    backgroundColor: "#fafafa",
-    color: "#333",
-  },
-  input: {
-    marginTop: "10px",
-    marginBottom: "20px",
-    color: "#111",
-  },
-  button: {
-    padding: "10px 20px",
-    backgroundColor: "#0070f3",
-    color: "#fff",
-    border: "none",
-    borderRadius: "6px",
-    cursor: "pointer",
-  },
-  message: {
-    marginTop: "20px",
-    fontWeight: "bold",
-    color: "green",
-  },
-};

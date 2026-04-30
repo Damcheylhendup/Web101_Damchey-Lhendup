@@ -1,36 +1,47 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import { getAllVideos } from "../../services/videoService";
+
 export default function ExplorePage() {
+  const [videos, setVideos] = useState([]);
+
+  useEffect(() => {
+    getAllVideos()
+      .then((data) => setVideos(data))
+      .catch((err) => console.log(err));
+  }, []);
+
   return (
-    <div className="p-4">
-      <h2 className="text-2xl font-bold mb-4">Explore</h2>
+    <main style={{ padding: "25px" }}>
+      <h1>Explore</h1>
 
-      <div className="mb-8">
-        <h3 className="text-xl font-semibold mb-3">Trending Hashtags</h3>
-        <div className="grid grid-cols-3 gap-4">
-          {Array.from({ length: 6 }).map((_, index) => (
-            <div
-              key={index}
-              className="aspect-video bg-gray-200 rounded-md flex flex-col items-center justify-center p-4"
-            >
-              <p className="font-bold text-lg">#Trending{index + 1}</p>
-              <p className="text-sm text-gray-500">{(index + 1) * 1.5}M views</p>
-            </div>
-          ))}
-        </div>
+      <h2>Trending Hashtags</h2>
+
+      <div className="trending-grid">
+        {[1, 2, 3, 4, 5, 6].map((item) => (
+          <div className="trend-card" key={item}>
+            <h3>#Trending{item}</h3>
+            <p>{item * 1.5}M views</p>
+          </div>
+        ))}
       </div>
 
-      <div>
-        <h3 className="text-xl font-semibold mb-3">Popular Videos</h3>
-        <div className="grid grid-cols-4 gap-3">
-          {Array.from({ length: 12 }).map((_, index) => (
-            <div
-              key={index}
-              className="aspect-[9/16] bg-gray-300 rounded-md flex items-center justify-center"
-            >
-              <p className="text-sm">Video {index + 1}</p>
-            </div>
-          ))}
-        </div>
+      <h2 style={{ marginTop: "35px" }}>Popular Videos</h2>
+
+      <div className="popular-grid">
+        {videos.map((video) => (
+          <div key={video.id} className="video-card">
+            <video width="100%" controls>
+              <source src={video.videoUrl} type="video/mp4" />
+            </video>
+
+            <p>{video.title}</p>
+            <p>@{video.username}</p>
+            <p>{video.caption}</p>
+          </div>
+        ))}
       </div>
-    </div>
+    </main>
   );
 }
